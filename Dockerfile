@@ -13,10 +13,16 @@ FROM tomcat:9.0-jdk11
 # Remove default Tomcat apps
 RUN rm -rf /usr/local/tomcat/webapps/*
 
-# Copy built WAR as ROOT so app runs at /  (not /AIBRDGenerator)
+# Copy built WAR as ROOT so app runs at /
 COPY --from=build /app/target/AIBRDGenerator.war /usr/local/tomcat/webapps/ROOT.war
 
-# Expose port
+# Railway dynamically assigns PORT env variable
+# Update Tomcat to listen on $PORT instead of hardcoded 8080
+RUN sed -i 's/port="8080"/port="${PORT}"/' /usr/local/tomcat/conf/server.xml
+
+# Set default PORT for local testing
+ENV PORT=8080
+
 EXPOSE 8080
 
 CMD ["catalina.sh", "run"]
