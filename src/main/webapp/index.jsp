@@ -209,10 +209,7 @@ nav {
   border-radius: var(--radius-cards);
   font-size: 14px;
   margin-bottom: 21px;
-  display: flex;
-  gap: 10px;
-  align-items: flex-start;
-  line-height: 1.5;
+  line-height: 1.6;
 }
 
 .alert-success {
@@ -375,9 +372,7 @@ textarea { resize: vertical; min-height: 130px; line-height: 1.6; }
     <h2>Upload communication</h2>
 
     <% if (successProject != null) { %>
-    <div class="alert alert-success">
-      ✓ Communication saved for <strong><%= successProject %></strong>. Upload more or generate the BRD.
-    </div>
+    <div class="alert alert-success">✓ Communication saved for <strong><%= successProject %></strong>. Upload more or generate the BRD.</div>
     <% } %>
 
     <% if (errorMsg != null) { %>
