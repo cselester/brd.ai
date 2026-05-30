@@ -4,18 +4,9 @@ String brdContent  = (String) session.getAttribute("generatedBRD");
 String projectName = (String) session.getAttribute("brdProjectName");
 String editError   = (String) session.getAttribute("editError");
 String editSuccess = (String) session.getAttribute("editSuccess");
-
-if (brdContent == null) {
-    response.sendRedirect("generate-brd.jsp");
-    return;
-}
-
-// Clear one-time flash messages
+if (brdContent == null) { response.sendRedirect("generate-brd.jsp"); return; }
 if (editError   != null) session.removeAttribute("editError");
 if (editSuccess != null) session.removeAttribute("editSuccess");
-
-// Keep BRD + project in session so editing works across refreshes
-// (they'll be cleared when user navigates away)
 %>
 <!DOCTYPE html>
 <html lang="en">
@@ -23,371 +14,355 @@ if (editSuccess != null) session.removeAttribute("editSuccess");
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title><%= projectName %> — BRD</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@300&family=Inter:wght@300;400&display=swap" rel="stylesheet">
 <style>
-  * { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --color-forest-green: #0f3e17;
+  --color-cream-canvas: #fffefc;
+  --color-mint-glaze: #b1dbb8;
+  --color-slate-mist: #b6ced5;
+  --color-keylime-wash: #e1f4df;
+  --color-mint-kiss: #cfe7d3;
+  --color-border-grey: #e5e7eb;
+  --color-ink-text: #222222;
+  --color-dark-charcoal: #333333;
+  --font-body: 'Inter', ui-sans-serif, system-ui, sans-serif;
+  --font-display: 'Playfair Display', serif;
+  --radius-cards: 14px;
+  --radius-buttons: 14px;
+  --radius-badges: 999px;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: var(--font-body);
+  background: var(--color-cream-canvas);
+  color: var(--color-ink-text);
+  min-height: 100vh;
+  font-size: 14px;
+  line-height: 1.5;
+  letter-spacing: -0.42px;
+}
 
-  body {
-    font-family: 'Segoe UI', system-ui, sans-serif;
-    background: #0f0e17;
-    min-height: 100vh;
-    color: #e2e8f0;
-  }
+/* NAV */
+nav {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px 42px;
+  border-bottom: 1px solid var(--color-border-grey);
+  background: var(--color-cream-canvas);
+  position: sticky; top: 0; z-index: 200;
+}
+.nav-left { display: flex; align-items: center; gap: 14px; }
+.nav-brand { display: flex; align-items: center; gap: 10px; text-decoration: none; }
+.nav-logo {
+  width: 28px; height: 28px;
+  background: var(--color-forest-green);
+  border-radius: 7px;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--color-cream-canvas); font-size: 14px;
+}
+.nav-title {
+  font-family: var(--font-display);
+  font-weight: 300; font-size: 16px;
+  color: var(--color-forest-green); letter-spacing: -0.48px;
+}
+.nav-sep { color: var(--color-border-grey); font-size: 18px; }
+.nav-project {
+  font-size: 14px; font-weight: 400;
+  color: var(--color-ink-text); letter-spacing: -0.42px;
+}
+.nav-badge {
+  background: var(--color-keylime-wash);
+  color: var(--color-forest-green);
+  border: 1px solid var(--color-mint-glaze);
+  padding: 4px 12px;
+  border-radius: var(--radius-badges);
+  font-size: 11px; font-weight: 400; letter-spacing: -0.33px;
+}
+.nav-right { display: flex; gap: 9px; }
+.btn-sm {
+  padding: 7px 14px;
+  border-radius: var(--radius-buttons);
+  font-family: var(--font-body);
+  font-size: 13px; font-weight: 400;
+  cursor: pointer; border: none;
+  letter-spacing: -0.39px;
+  transition: all 0.15s;
+}
+.btn-outline {
+  background: transparent;
+  border: 1px solid var(--color-border-grey);
+  color: var(--color-dark-charcoal);
+}
+.btn-outline:hover { background: var(--color-keylime-wash); border-color: var(--color-mint-glaze); color: var(--color-forest-green); }
+.btn-filled {
+  background: var(--color-forest-green);
+  color: var(--color-cream-canvas);
+}
+.btn-filled:hover { opacity: 0.88; }
 
-  /* ── TOP BAR ── */
-  .topbar {
-    background: rgba(255,255,255,0.04);
-    border-bottom: 1px solid rgba(255,255,255,0.1);
-    padding: 14px 32px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    position: sticky;
-    top: 0;
-    z-index: 200;
-    backdrop-filter: blur(12px);
-  }
-  .topbar-left { display: flex; align-items: center; gap: 14px; }
-  .topbar a {
-    color: rgba(255,255,255,0.45);
-    text-decoration: none;
-    font-size: 13px;
-  }
-  .topbar a:hover { color: #a78bfa; }
-  .topbar h1 { font-size: 0.95rem; font-weight: 600; color: #fff; }
-  .badge {
-    background: rgba(167,139,250,0.15);
-    color: #a78bfa;
-    border: 1px solid rgba(167,139,250,0.3);
-    padding: 2px 10px;
-    border-radius: 20px;
-    font-size: 11px;
-    font-weight: 700;
-    letter-spacing: 0.5px;
-    text-transform: uppercase;
-  }
-  .topbar-right { display: flex; gap: 8px; }
+/* LAYOUT */
+.layout {
+  display: grid;
+  grid-template-columns: 1fr 340px;
+  min-height: calc(100vh - 57px);
+}
 
-  /* ── BUTTONS ── */
-  .btn {
-    padding: 8px 16px;
-    border-radius: 8px;
-    font-size: 13px;
-    font-weight: 600;
-    cursor: pointer;
-    border: none;
-    transition: all 0.2s;
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-  }
-  .btn-outline {
-    background: transparent;
-    border: 1px solid rgba(255,255,255,0.18);
-    color: rgba(255,255,255,0.65);
-  }
-  .btn-outline:hover { background: rgba(255,255,255,0.08); color: #fff; }
-  .btn-primary {
-    background: linear-gradient(135deg, #7c3aed, #4f46e5);
-    color: #fff;
-    box-shadow: 0 3px 12px rgba(124,58,237,0.35);
-  }
-  .btn-primary:hover { opacity: 0.9; transform: translateY(-1px); }
-  .btn-primary:disabled { opacity: 0.55; cursor: not-allowed; transform: none; }
-  .btn-ghost {
-    background: transparent;
-    color: rgba(255,255,255,0.4);
-    border: none;
-    padding: 6px 10px;
-  }
-  .btn-ghost:hover { color: #f87171; }
+/* DOC PANEL */
+.doc-panel {
+  padding: 42px;
+  overflow-y: auto;
+  border-right: 1px solid var(--color-border-grey);
+}
 
-  /* ── LAYOUT ── */
-  .page {
-    display: grid;
-    grid-template-columns: 1fr 360px;
-    gap: 0;
-    min-height: calc(100vh - 57px);
-  }
+.doc-meta {
+  display: flex; align-items: center; gap: 14px;
+  margin-bottom: 28px;
+}
+.doc-meta-label {
+  font-size: 11px; font-weight: 400;
+  text-transform: uppercase; letter-spacing: 0.5px;
+  color: var(--color-forest-green); opacity: 0.6;
+}
+.doc-meta-divider { color: var(--color-border-grey); }
 
-  /* ── BRD DOCUMENT PANEL ── */
-  .doc-panel {
-    padding: 36px 40px 80px;
-    overflow-y: auto;
-    border-right: 1px solid rgba(255,255,255,0.06);
-  }
+.doc-title {
+  font-family: var(--font-display);
+  font-weight: 300;
+  font-size: 28px;
+  line-height: 1.3;
+  letter-spacing: -0.84px;
+  color: var(--color-forest-green);
+  margin-bottom: 28px;
+  padding-bottom: 21px;
+  border-bottom: 1px solid var(--color-border-grey);
+}
 
-  .doc-header {
-    margin-bottom: 28px;
-    padding: 24px 28px;
-    background: linear-gradient(135deg, rgba(124,58,237,0.12), rgba(79,70,229,0.08));
-    border: 1px solid rgba(124,58,237,0.22);
-    border-radius: 14px;
-  }
-  .doc-header .label {
-    text-transform: uppercase;
-    font-size: 10px;
-    font-weight: 700;
-    letter-spacing: 2px;
-    color: #a78bfa;
-    margin-bottom: 6px;
-  }
-  .doc-header h2 { font-size: 1.4rem; color: #fff; margin-bottom: 4px; }
-  .doc-header p  { color: rgba(255,255,255,0.38); font-size: 12px; }
+.brd-body {
+  background: var(--color-keylime-wash);
+  border-radius: var(--radius-cards);
+  border: 1px solid var(--color-mint-glaze);
+  padding: 42px;
+  line-height: 1.8;
+  font-size: 14px;
+  color: var(--color-dark-charcoal);
+  font-weight: 300;
+}
+.brd-body h2 {
+  font-family: var(--font-display);
+  font-weight: 300;
+  font-size: 18px;
+  color: var(--color-forest-green);
+  margin: 28px 0 10px;
+  padding-bottom: 7px;
+  border-bottom: 1px solid var(--color-mint-glaze);
+  letter-spacing: -0.54px;
+}
+.brd-body h2:first-child { margin-top: 0; }
+.brd-body ul { padding-left: 20px; margin: 8px 0 14px; }
+.brd-body li { margin-bottom: 6px; }
+.brd-body p { margin-bottom: 12px; }
 
-  .brd-content {
-    background: #1a1a2e;
-    border: 1px solid rgba(255,255,255,0.07);
-    border-radius: 14px;
-    padding: 36px;
-    line-height: 1.85;
-    font-size: 15px;
-  }
-  .brd-content h2 {
-    color: #a78bfa;
-    font-size: 1.05rem;
-    font-weight: 700;
-    margin: 28px 0 10px;
-    padding-bottom: 7px;
-    border-bottom: 1px solid rgba(167,139,250,0.18);
-  }
-  .brd-content h2:first-child { margin-top: 0; }
-  .brd-content ul  { padding-left: 22px; margin: 6px 0 14px; }
-  .brd-content li  { margin-bottom: 5px; color: #94a3b8; }
-  .brd-content p   { margin-bottom: 10px; color: #94a3b8; }
-  .brd-content hr  { border: none; border-top: 1px solid rgba(255,255,255,0.07); margin: 20px 0; }
+/* EDIT PANEL */
+.edit-panel {
+  background: var(--color-mint-kiss);
+  border-left: 1px solid var(--color-mint-glaze);
+  padding: 28px 21px;
+  display: flex; flex-direction: column; gap: 21px;
+  overflow-y: auto;
+}
 
-  /* ── EDIT SIDEBAR ── */
-  .edit-panel {
-    background: #13121f;
-    display: flex;
-    flex-direction: column;
-    padding: 24px 20px;
-    gap: 16px;
-    overflow-y: auto;
-  }
+.edit-section-title {
+  font-size: 11px; font-weight: 400;
+  text-transform: uppercase; letter-spacing: 0.5px;
+  color: var(--color-forest-green); opacity: 0.65;
+}
 
-  .edit-panel h3 {
-    font-size: 0.85rem;
-    font-weight: 700;
-    color: rgba(255,255,255,0.5);
-    text-transform: uppercase;
-    letter-spacing: 1px;
-  }
+.alert-sm {
+  padding: 11px 14px;
+  border-radius: var(--radius-cards);
+  font-size: 13px; line-height: 1.5;
+  display: flex; gap: 8px; align-items: flex-start;
+}
+.alert-success { background: var(--color-keylime-wash); border: 1px solid var(--color-mint-glaze); color: var(--color-forest-green); }
+.alert-error { background: #fef2f2; border: 1px solid #fecaca; color: #dc2626; }
 
-  /* Flash alerts */
-  .alert {
-    padding: 11px 14px;
-    border-radius: 10px;
-    font-size: 13px;
-    display: flex;
-    align-items: flex-start;
-    gap: 8px;
-    line-height: 1.5;
-  }
-  .alert-success {
-    background: rgba(16,185,129,0.12);
-    border: 1px solid rgba(16,185,129,0.28);
-    color: #34d399;
-  }
-  .alert-error {
-    background: rgba(239,68,68,0.12);
-    border: 1px solid rgba(239,68,68,0.28);
-    color: #f87171;
-  }
+/* Chips */
+.chips-label { font-size: 11px; color: var(--color-dark-charcoal); opacity: 0.6; margin-bottom: 8px; }
+.chips { display: flex; flex-wrap: wrap; gap: 7px; }
+.chip {
+  background: var(--color-cream-canvas);
+  border: 1px solid var(--color-border-grey);
+  color: var(--color-dark-charcoal);
+  padding: 6px 12px;
+  border-radius: var(--radius-badges);
+  font-size: 12px; font-weight: 300; cursor: pointer;
+  transition: all 0.15s; letter-spacing: -0.36px;
+}
+.chip:hover {
+  background: var(--color-keylime-wash);
+  border-color: var(--color-mint-glaze);
+  color: var(--color-forest-green);
+}
 
-  /* Suggestions chips */
-  .suggestions-label {
-    font-size: 11px;
-    color: rgba(255,255,255,0.35);
-    margin-bottom: 6px;
-  }
-  .chips { display: flex; flex-wrap: wrap; gap: 7px; }
-  .chip {
-    background: rgba(255,255,255,0.06);
-    border: 1px solid rgba(255,255,255,0.12);
-    color: rgba(255,255,255,0.6);
-    padding: 5px 11px;
-    border-radius: 20px;
-    font-size: 12px;
-    cursor: pointer;
-    transition: all 0.18s;
-    line-height: 1.4;
-  }
-  .chip:hover {
-    background: rgba(124,58,237,0.2);
-    border-color: rgba(124,58,237,0.4);
-    color: #c4b5fd;
-  }
+.divider { border: none; border-top: 1px solid var(--color-mint-glaze); }
 
-  /* Text area */
-  .edit-textarea {
-    width: 100%;
-    background: rgba(255,255,255,0.06);
-    border: 1px solid rgba(255,255,255,0.13);
-    border-radius: 10px;
-    color: #fff;
-    font-size: 14px;
-    font-family: inherit;
-    padding: 12px 14px;
-    resize: vertical;
-    min-height: 110px;
-    outline: none;
-    transition: border-color 0.2s, box-shadow 0.2s;
-    line-height: 1.6;
-  }
-  .edit-textarea:focus {
-    border-color: #7c3aed;
-    box-shadow: 0 0 0 3px rgba(124,58,237,0.18);
-  }
-  .edit-textarea::placeholder { color: rgba(255,255,255,0.25); }
+/* Textarea */
+.edit-textarea {
+  width: 100%;
+  background: var(--color-cream-canvas);
+  border: 1px solid var(--color-border-grey);
+  border-radius: var(--radius-buttons);
+  color: var(--color-ink-text);
+  font-family: var(--font-body);
+  font-size: 14px; font-weight: 300;
+  letter-spacing: -0.42px;
+  padding: 12px 14px;
+  resize: vertical; min-height: 100px;
+  outline: none; line-height: 1.6;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.edit-textarea:focus {
+  border-color: var(--color-forest-green);
+  box-shadow: 0 0 0 3px rgba(15,62,23,0.08);
+}
+.edit-textarea::placeholder { color: #bbb; }
 
-  /* Spinner */
-  .spinner {
-    display: none;
-    width: 15px; height: 15px;
-    border: 2px solid rgba(255,255,255,0.3);
-    border-top-color: #fff;
-    border-radius: 50%;
-    animation: spin 0.7s linear infinite;
-    flex-shrink: 0;
-  }
-  @keyframes spin { to { transform: rotate(360deg); } }
+.char-hint { text-align: right; font-size: 11px; color: var(--color-dark-charcoal); opacity: 0.45; margin-top: 4px; }
 
-  /* History log */
-  .history { display: flex; flex-direction: column; gap: 8px; }
-  .history-item {
-    background: rgba(255,255,255,0.04);
-    border: 1px solid rgba(255,255,255,0.08);
-    border-radius: 8px;
-    padding: 9px 12px;
-    font-size: 12px;
-    color: rgba(255,255,255,0.45);
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    gap: 8px;
-  }
-  .history-item span { flex: 1; line-height: 1.5; }
-  .history-empty {
-    font-size: 12px;
-    color: rgba(255,255,255,0.22);
-    text-align: center;
-    padding: 10px 0;
-  }
+.btn-apply {
+  width: 100%;
+  padding: 12px 18px;
+  background: var(--color-forest-green);
+  color: var(--color-cream-canvas);
+  border: none; border-radius: var(--radius-buttons);
+  font-family: var(--font-body);
+  font-size: 14px; font-weight: 400; letter-spacing: -0.42px;
+  cursor: pointer; transition: opacity 0.2s;
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+}
+.btn-apply:hover { opacity: 0.88; }
+.btn-apply:disabled { opacity: 0.5; cursor: not-allowed; }
 
-  .divider {
-    border: none;
-    border-top: 1px solid rgba(255,255,255,0.07);
-    margin: 4px 0;
-  }
+.spinner {
+  display: none; width: 14px; height: 14px;
+  border: 2px solid rgba(255,255,255,0.35);
+  border-top-color: #fff; border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
 
-  /* ── PRINT ── */
-  @media print {
-    .topbar, .edit-panel { display: none !important; }
-    .page { grid-template-columns: 1fr; }
-    body { background: white; color: black; }
-    .brd-content { background: white; color: black; border: none; padding: 0; }
-    .brd-content h2 { color: #1a237e; }
-    .brd-content li, .brd-content p { color: #333; }
-    .doc-header { background: #f0f0ff; border-color: #c5cae9; }
-    .doc-header h2, .doc-header .label { color: #1a237e; }
-    .doc-header p { color: #555; }
-  }
+/* History */
+.history { display: flex; flex-direction: column; gap: 7px; }
+.history-item {
+  background: var(--color-cream-canvas);
+  border: 1px solid var(--color-border-grey);
+  border-radius: var(--radius-cards);
+  padding: 9px 12px;
+  font-size: 12px; font-weight: 300;
+  color: var(--color-dark-charcoal);
+  display: flex; justify-content: space-between; align-items: flex-start; gap: 8px;
+  letter-spacing: -0.36px;
+}
+.history-item span { flex: 1; line-height: 1.5; }
+.history-empty { font-size: 12px; color: var(--color-dark-charcoal); opacity: 0.4; text-align: center; padding: 8px 0; }
 
-  /* ── MOBILE ── */
-  @media (max-width: 768px) {
-    .page { grid-template-columns: 1fr; }
-    .doc-panel { border-right: none; border-bottom: 1px solid rgba(255,255,255,0.06); padding: 20px; }
-    .edit-panel { padding: 20px; }
-    .topbar { padding: 12px 16px; }
-  }
+@media print {
+  nav, .edit-panel { display: none !important; }
+  .layout { grid-template-columns: 1fr; }
+  .brd-body { background: white; border: none; color: black; }
+  .brd-body h2 { color: var(--color-forest-green); border-color: #ddd; }
+}
+
+@media (max-width: 900px) {
+  .layout { grid-template-columns: 1fr; }
+  .doc-panel { border-right: none; border-bottom: 1px solid var(--color-border-grey); }
+  nav { padding: 12px 21px; }
+  .nav-sep, .nav-project { display: none; }
+}
 </style>
 </head>
 <body>
 
-<!-- TOP BAR -->
-<div class="topbar">
-  <div class="topbar-left">
-    <a href="generate-brd.jsp">← Back</a>
-    <h1><%= projectName %></h1>
-    <span class="badge">BRD</span>
+<nav>
+  <div class="nav-left">
+    <a href="generate-brd.jsp" class="nav-brand">
+      <div class="nav-logo">📄</div>
+      <span class="nav-title">BRD Generator</span>
+    </a>
+    <span class="nav-sep">/</span>
+    <span class="nav-project"><%= projectName %></span>
+    <span class="nav-badge">BRD</span>
   </div>
-  <div class="topbar-right">
-    <button class="btn btn-outline" onclick="window.print()">🖨 Print</button>
-    <button class="btn btn-outline" onclick="copyBRD(this)">Copy</button>
+  <div class="nav-right">
+    <button class="btn-sm btn-outline" onclick="window.print()">Print</button>
+    <button class="btn-sm btn-filled" onclick="copyBRD(this)">Copy</button>
   </div>
-</div>
+</nav>
 
-<div class="page">
+<div class="layout">
 
-  <!-- LEFT: BRD DOCUMENT -->
+  <!-- LEFT: DOCUMENT -->
   <div class="doc-panel">
-    <div class="doc-header">
-      <div class="label">Business Requirements Document</div>
-      <h2><%= projectName %></h2>
-      <p>Generated by AI &nbsp;·&nbsp; Use the editor on the right to refine</p>
+    <div class="doc-meta">
+      <span class="doc-meta-label">Business Requirements Document</span>
+      <span class="doc-meta-divider">·</span>
+      <span class="doc-meta-label">Generated by AI</span>
     </div>
-    <div class="brd-content" id="brdBody">
+    <div class="doc-title"><%= projectName %></div>
+    <div class="brd-body" id="brdBody">
       <%= brdContent %>
     </div>
   </div>
 
-  <!-- RIGHT: EDIT PANEL -->
+  <!-- RIGHT: EDIT -->
   <div class="edit-panel">
 
-    <h3>✏ Edit with AI</h3>
+    <div class="edit-section-title">✦ Edit with AI</div>
 
-    <!-- Flash messages -->
     <% if (editSuccess != null) { %>
-    <div class="alert alert-success">✓ <%= editSuccess %></div>
+    <div class="alert-sm alert-success">✓ <%= editSuccess %></div>
     <% } %>
     <% if (editError != null) { %>
-    <div class="alert alert-error">⚠ <%= editError %></div>
+    <div class="alert-sm alert-error">⚠ <%= editError %></div>
     <% } %>
 
-    <!-- Quick suggestion chips -->
     <div>
-      <div class="suggestions-label">Quick edits</div>
+      <div class="chips-label">Quick edits</div>
       <div class="chips">
-        <span class="chip" onclick="setInstruction('Add payment gateway requirement')">+ Payment gateway</span>
-        <span class="chip" onclick="setInstruction('Add user authentication and login requirements')">+ Authentication</span>
-        <span class="chip" onclick="setInstruction('Add mobile app support requirement')">+ Mobile support</span>
-        <span class="chip" onclick="setInstruction('Add data security and encryption requirements')">+ Security</span>
-        <span class="chip" onclick="setInstruction('Add third-party API integration requirement')">+ API integration</span>
-        <span class="chip" onclick="setInstruction('Make the tone more formal and professional')">Formal tone</span>
-        <span class="chip" onclick="setInstruction('Add performance and scalability requirements')">+ Performance</span>
-        <span class="chip" onclick="setInstruction('Expand the Executive Summary section')">Expand summary</span>
+        <span class="chip" onclick="setInstr('Add payment gateway requirement')">+ Payment gateway</span>
+        <span class="chip" onclick="setInstr('Add user authentication and login requirements')">+ Authentication</span>
+        <span class="chip" onclick="setInstr('Add mobile app support requirement')">+ Mobile support</span>
+        <span class="chip" onclick="setInstr('Add data security and encryption requirements')">+ Security</span>
+        <span class="chip" onclick="setInstr('Add third-party API integration requirement')">+ API integration</span>
+        <span class="chip" onclick="setInstr('Make the tone more formal and professional')">Formal tone</span>
+        <span class="chip" onclick="setInstr('Add performance and scalability requirements')">+ Performance</span>
+        <span class="chip" onclick="setInstr('Expand the Executive Summary section')">Expand summary</span>
       </div>
     </div>
 
     <hr class="divider">
 
-    <!-- Instruction input -->
-    <form action="EditBRDServlet" method="post" onsubmit="return onEditSubmit()">
-      <input type="hidden" name="existingBRD"  id="existingBRD"  value="<%= brdContent.replace("\"", "&quot;").replace("<", "&lt;").replace(">", "&gt;") %>">
-      <input type="hidden" name="projectName"  value="<%= projectName %>">
+    <form action="EditBRDServlet" method="post" onsubmit="return onEdit()">
+      <input type="hidden" name="existingBRD" id="existingBRD">
+      <input type="hidden" name="projectName" value="<%= projectName %>">
 
-      <textarea
-        class="edit-textarea"
-        name="userInstruction"
-        id="userInstruction"
+      <textarea class="edit-textarea" name="userInstruction" id="instr"
         placeholder="Describe your change…&#10;e.g. Add payment gateway requirement so users can make payments"
-        maxlength="500"></textarea>
+        maxlength="500" oninput="updateIC()"></textarea>
+      <div class="char-hint"><span id="ic">0</span>/500</div>
 
-      <div style="text-align:right; font-size:11px; color:rgba(255,255,255,0.25); margin: 4px 0 10px;">
-        <span id="instrCount">0</span>/500
-      </div>
+      <br>
 
-      <button type="submit" class="btn btn-primary" id="editBtn" style="width:100%;">
-        <span class="spinner" id="editSpinner"></span>
-        <span id="editBtnText">Apply Edit</span>
+      <button type="submit" class="btn-apply" id="applyBtn">
+        <span class="spinner" id="sp"></span>
+        <span id="applyTxt">Apply Edit</span>
       </button>
     </form>
 
     <hr class="divider">
 
-    <!-- Edit history (client-side) -->
-    <h3>📋 Edit History</h3>
+    <div class="edit-section-title">History</div>
     <div class="history" id="historyList">
       <div class="history-empty" id="historyEmpty">No edits yet</div>
     </div>
@@ -396,66 +371,46 @@ if (editSuccess != null) session.removeAttribute("editSuccess");
 </div>
 
 <script>
-  // Populate hidden field with live BRD HTML for editing
-  const brdBody = document.getElementById('brdBody');
+const brdBody = document.getElementById('brdBody');
 
-  function setInstruction(text) {
-    const ta = document.getElementById('userInstruction');
-    ta.value = text;
-    ta.focus();
-    updateInstrCount();
-  }
-
-  function updateInstrCount() {
-    const ta = document.getElementById('userInstruction');
-    document.getElementById('instrCount').textContent = ta.value.length;
-  }
-  document.getElementById('userInstruction').addEventListener('input', updateInstrCount);
-
-  function onEditSubmit() {
-    const instr = document.getElementById('userInstruction').value.trim();
-    if (!instr) {
-      alert('Please enter an instruction.');
-      return false;
-    }
-
-    // Save to local edit history
-    const history = JSON.parse(localStorage.getItem('brdEditHistory') || '[]');
-    history.unshift({ text: instr, time: new Date().toLocaleTimeString() });
-    localStorage.setItem('brdEditHistory', JSON.stringify(history.slice(0, 10)));
-
-    // Sync hidden field with current rendered BRD content
-    document.getElementById('existingBRD').value = brdBody.innerHTML;
-
-    // Show loading state
-    document.getElementById('editSpinner').style.display = 'block';
-    document.getElementById('editBtnText').textContent = 'Applying...';
-    document.getElementById('editBtn').disabled = true;
-    return true;
-  }
-
-  function copyBRD(btn) {
-    navigator.clipboard.writeText(brdBody.innerText).then(() => {
-      btn.textContent = '✓ Copied!';
-      setTimeout(() => btn.textContent = 'Copy', 2000);
-    });
-  }
-
-  // Render local edit history on load
-  function renderHistory() {
-    const history = JSON.parse(localStorage.getItem('brdEditHistory') || '[]');
-    const list = document.getElementById('historyList');
-    const empty = document.getElementById('historyEmpty');
-    if (history.length === 0) return;
-    empty.style.display = 'none';
-    history.forEach(item => {
-      const div = document.createElement('div');
-      div.className = 'history-item';
-      div.innerHTML = `<span>"${item.text}"</span><small style="color:rgba(255,255,255,0.2);white-space:nowrap">${item.time}</small>`;
-      list.appendChild(div);
-    });
-  }
-  renderHistory();
+function setInstr(t) {
+  const ta = document.getElementById('instr');
+  ta.value = t; ta.focus(); updateIC();
+}
+function updateIC() {
+  document.getElementById('ic').textContent = document.getElementById('instr').value.length;
+}
+function onEdit() {
+  const v = document.getElementById('instr').value.trim();
+  if (!v) { alert('Please enter an instruction.'); return false; }
+  const h = JSON.parse(localStorage.getItem('brdHistory') || '[]');
+  h.unshift({ text: v, time: new Date().toLocaleTimeString() });
+  localStorage.setItem('brdHistory', JSON.stringify(h.slice(0,10)));
+  document.getElementById('existingBRD').value = brdBody.innerHTML;
+  document.getElementById('sp').style.display = 'block';
+  document.getElementById('applyTxt').textContent = 'Applying…';
+  document.getElementById('applyBtn').disabled = true;
+  return true;
+}
+function copyBRD(btn) {
+  navigator.clipboard.writeText(brdBody.innerText).then(() => {
+    btn.textContent = '✓ Copied';
+    setTimeout(() => btn.textContent = 'Copy', 2000);
+  });
+}
+function renderHistory() {
+  const h = JSON.parse(localStorage.getItem('brdHistory') || '[]');
+  if (!h.length) return;
+  const list = document.getElementById('historyList');
+  document.getElementById('historyEmpty').style.display = 'none';
+  h.forEach(item => {
+    const d = document.createElement('div');
+    d.className = 'history-item';
+    d.innerHTML = `<span>"${item.text}"</span><small style="color:#aaa;white-space:nowrap">${item.time}</small>`;
+    list.appendChild(d);
+  });
+}
+renderHistory();
 </script>
 </body>
 </html>

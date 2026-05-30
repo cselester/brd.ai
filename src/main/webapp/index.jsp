@@ -10,285 +10,427 @@ if (errorMsg != null) session.removeAttribute("uploadError");
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>AI BRD Generator</title>
+<title>BRD Generator — Upload</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@300&family=Inter:wght@300;400&display=swap" rel="stylesheet">
 <style>
-  * { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --color-forest-green: #0f3e17;
+  --color-cream-canvas: #fffefc;
+  --color-mint-glaze: #b1dbb8;
+  --color-slate-mist: #b6ced5;
+  --color-keylime-wash: #e1f4df;
+  --color-mint-kiss: #cfe7d3;
+  --color-border-grey: #e5e7eb;
+  --color-ink-text: #222222;
+  --color-dark-charcoal: #333333;
+  --font-body: 'Inter', ui-sans-serif, system-ui, sans-serif;
+  --font-display: 'Playfair Display', serif;
+  --radius-cards: 14px;
+  --radius-buttons: 14px;
+  --radius-badges: 999px;
+  --card-padding: 42px;
+  --element-gap: 21px;
+}
 
-  body {
-    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-    background: linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%);
-    min-height: 100vh;
-    display: flex;
-    align-items: flex-start;
-    justify-content: center;
-    padding: 40px 20px;
-  }
+* { box-sizing: border-box; margin: 0; padding: 0; }
 
-  .container {
-    width: 100%;
-    max-width: 700px;
-  }
+body {
+  font-family: var(--font-body);
+  background: var(--color-cream-canvas);
+  color: var(--color-ink-text);
+  min-height: 100vh;
+  font-size: 14px;
+  line-height: 1.5;
+  letter-spacing: -0.42px;
+}
 
-  .header {
-    text-align: center;
-    margin-bottom: 32px;
-    color: white;
-  }
+/* NAV */
+nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 42px;
+  border-bottom: 1px solid var(--color-border-grey);
+  background: var(--color-cream-canvas);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
 
-  .header .badge {
-    display: inline-block;
-    background: rgba(255,255,255,0.15);
-    border: 1px solid rgba(255,255,255,0.25);
-    color: #a78bfa;
-    font-size: 12px;
-    font-weight: 600;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    padding: 4px 14px;
-    border-radius: 20px;
-    margin-bottom: 16px;
-  }
+.nav-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+}
 
-  .header h1 {
-    font-size: 2.4rem;
-    font-weight: 700;
-    background: linear-gradient(90deg, #a78bfa, #60a5fa);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    margin-bottom: 8px;
-  }
+.nav-logo {
+  width: 32px; height: 32px;
+  background: var(--color-forest-green);
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--color-cream-canvas);
+  font-size: 16px;
+}
 
-  .header p {
-    color: rgba(255,255,255,0.5);
-    font-size: 0.95rem;
-  }
+.nav-title {
+  font-family: var(--font-display);
+  font-weight: 300;
+  font-size: 18px;
+  color: var(--color-forest-green);
+  letter-spacing: -0.54px;
+}
 
-  .card {
-    background: rgba(255,255,255,0.05);
-    border: 1px solid rgba(255,255,255,0.12);
-    border-radius: 20px;
-    padding: 36px;
-    backdrop-filter: blur(20px);
-  }
+.nav-pill {
+  background: var(--color-cream-canvas);
+  color: var(--color-forest-green);
+  border: 1px solid var(--color-border-grey);
+  padding: 9px 18px;
+  border-radius: var(--radius-badges);
+  font-size: 12px;
+  font-weight: 400;
+  letter-spacing: -0.36px;
+  text-decoration: none;
+  transition: background 0.2s;
+}
+.nav-pill:hover { background: var(--color-keylime-wash); }
 
-  .alert {
-    padding: 14px 18px;
-    border-radius: 12px;
-    margin-bottom: 24px;
-    font-size: 14px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-  }
+/* PAGE */
+.page {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 56px 42px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 42px;
+  align-items: start;
+}
 
-  .alert-success {
-    background: rgba(16, 185, 129, 0.15);
-    border: 1px solid rgba(16, 185, 129, 0.3);
-    color: #34d399;
-  }
+/* LEFT HERO */
+.hero {
+  padding-top: 14px;
+}
 
-  .alert-error {
-    background: rgba(239, 68, 68, 0.15);
-    border: 1px solid rgba(239, 68, 68, 0.3);
-    color: #f87171;
-  }
+.hero-badge {
+  display: inline-block;
+  background: var(--color-keylime-wash);
+  color: var(--color-forest-green);
+  border: 1px solid var(--color-mint-glaze);
+  padding: 7px 14px;
+  border-radius: var(--radius-badges);
+  font-size: 12px;
+  font-weight: 400;
+  letter-spacing: -0.36px;
+  margin-bottom: 21px;
+}
 
-  .form-group {
-    margin-bottom: 22px;
-  }
+.hero h1 {
+  font-family: var(--font-display);
+  font-weight: 300;
+  font-size: 40px;
+  line-height: 1.05;
+  letter-spacing: -0.4px;
+  color: var(--color-forest-green);
+  margin-bottom: 18px;
+}
 
-  label {
-    display: block;
-    color: rgba(255,255,255,0.7);
-    font-size: 13px;
-    font-weight: 600;
-    letter-spacing: 0.5px;
-    margin-bottom: 8px;
-    text-transform: uppercase;
-  }
+.hero p {
+  font-size: 18px;
+  font-weight: 300;
+  line-height: 1.5;
+  letter-spacing: -0.54px;
+  color: var(--color-dark-charcoal);
+  margin-bottom: 35px;
+  max-width: 380px;
+}
 
-  label span.required {
-    color: #f87171;
-    margin-left: 3px;
-  }
+.steps {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
 
-  select, input[type="text"], textarea {
-    width: 100%;
-    background: rgba(255,255,255,0.08);
-    border: 1px solid rgba(255,255,255,0.15);
-    border-radius: 10px;
-    color: white;
-    font-size: 15px;
-    padding: 12px 16px;
-    outline: none;
-    transition: border-color 0.2s, background 0.2s;
-    font-family: inherit;
-  }
+.step {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 18px 21px;
+  background: var(--color-keylime-wash);
+  border-radius: var(--radius-cards);
+  border: 1px solid var(--color-mint-glaze);
+}
 
-  select:focus, input[type="text"]:focus, textarea:focus {
-    border-color: #7c3aed;
-    background: rgba(255,255,255,0.12);
-    box-shadow: 0 0 0 3px rgba(124,58,237,0.2);
-  }
+.step-num {
+  width: 28px; height: 28px;
+  background: var(--color-forest-green);
+  color: var(--color-cream-canvas);
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px;
+  font-weight: 400;
+  flex-shrink: 0;
+}
 
-  select option {
-    background: #1e1b4b;
-  }
+.step-text strong {
+  display: block;
+  color: var(--color-forest-green);
+  font-size: 14px;
+  font-weight: 400;
+  margin-bottom: 2px;
+}
 
-  textarea {
-    resize: vertical;
-    min-height: 150px;
-    line-height: 1.6;
-  }
+.step-text span {
+  color: var(--color-dark-charcoal);
+  font-size: 12px;
+  font-weight: 300;
+}
 
-  ::placeholder { color: rgba(255,255,255,0.3); }
+/* FORM CARD */
+.form-card {
+  background: var(--color-mint-kiss);
+  border-radius: var(--radius-cards);
+  padding: var(--card-padding);
+  border: 1px solid var(--color-mint-glaze);
+}
 
-  .form-row {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 16px;
-  }
+.form-card h2 {
+  font-family: var(--font-display);
+  font-weight: 300;
+  font-size: 28px;
+  line-height: 1.3;
+  letter-spacing: -0.84px;
+  color: var(--color-forest-green);
+  margin-bottom: 28px;
+}
 
-  .btn {
-    width: 100%;
-    padding: 14px;
-    border: none;
-    border-radius: 12px;
-    font-size: 16px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.2s;
-    letter-spacing: 0.3px;
-  }
+.alert {
+  padding: 14px 18px;
+  border-radius: var(--radius-cards);
+  font-size: 14px;
+  margin-bottom: 21px;
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  line-height: 1.5;
+}
 
-  .btn-primary {
-    background: linear-gradient(135deg, #7c3aed, #4f46e5);
-    color: white;
-    box-shadow: 0 4px 15px rgba(124,58,237,0.4);
-  }
+.alert-success {
+  background: var(--color-keylime-wash);
+  border: 1px solid var(--color-mint-glaze);
+  color: var(--color-forest-green);
+}
 
-  .btn-primary:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 6px 20px rgba(124,58,237,0.5);
-  }
+.alert-error {
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #dc2626;
+}
 
-  .btn-primary:active { transform: translateY(0); }
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--element-gap);
+}
 
-  .divider {
-    border: none;
-    border-top: 1px solid rgba(255,255,255,0.1);
-    margin: 28px 0;
-  }
+.form-group {
+  margin-bottom: var(--element-gap);
+}
 
-  .secondary-action {
-    text-align: center;
-    color: rgba(255,255,255,0.5);
-    font-size: 14px;
-  }
+label {
+  display: block;
+  font-size: 12px;
+  font-weight: 400;
+  letter-spacing: -0.36px;
+  color: var(--color-forest-green);
+  margin-bottom: 7px;
+  text-transform: uppercase;
+}
 
-  .secondary-action a {
-    color: #a78bfa;
-    text-decoration: none;
-    font-weight: 600;
-  }
+label .req { color: #dc2626; margin-left: 2px; }
 
-  .secondary-action a:hover { text-decoration: underline; }
+select, input[type="text"], textarea {
+  width: 100%;
+  background: var(--color-cream-canvas);
+  border: 1px solid var(--color-border-grey);
+  border-radius: var(--radius-buttons);
+  color: var(--color-ink-text);
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: 300;
+  letter-spacing: -0.42px;
+  padding: 11px 14px;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  -webkit-appearance: none;
+}
 
-  .char-count {
-    text-align: right;
-    font-size: 12px;
-    color: rgba(255,255,255,0.3);
-    margin-top: 5px;
-  }
+select:focus, input[type="text"]:focus, textarea:focus {
+  border-color: var(--color-forest-green);
+  box-shadow: 0 0 0 3px rgba(15,62,23,0.08);
+}
 
-  @media (max-width: 520px) {
-    .form-row { grid-template-columns: 1fr; }
-    .header h1 { font-size: 1.8rem; }
-    .card { padding: 24px; }
-  }
+select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%230f3e17' d='M6 8L1 3h10z'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 12px center; padding-right: 32px; cursor: pointer; }
+
+textarea { resize: vertical; min-height: 130px; line-height: 1.6; }
+
+::placeholder { color: #aaa; }
+
+.char-hint {
+  text-align: right;
+  font-size: 11px;
+  color: var(--color-dark-charcoal);
+  margin-top: 4px;
+  opacity: 0.5;
+}
+
+.btn-primary {
+  width: 100%;
+  padding: 14px 21px;
+  background: var(--color-forest-green);
+  color: var(--color-cream-canvas);
+  border: none;
+  border-radius: var(--radius-buttons);
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: 400;
+  letter-spacing: -0.42px;
+  cursor: pointer;
+  transition: opacity 0.2s, transform 0.15s;
+  margin-top: 7px;
+}
+
+.btn-primary:hover { opacity: 0.88; transform: translateY(-1px); }
+.btn-primary:active { transform: translateY(0); }
+
+.form-footer {
+  margin-top: 21px;
+  padding-top: 21px;
+  border-top: 1px solid var(--color-border-grey);
+  text-align: center;
+  font-size: 13px;
+  color: var(--color-dark-charcoal);
+}
+
+.form-footer a {
+  color: var(--color-forest-green);
+  font-weight: 400;
+  text-decoration: none;
+}
+.form-footer a:hover { text-decoration: underline; }
+
+@media (max-width: 768px) {
+  .page { grid-template-columns: 1fr; padding: 28px 21px; }
+  .form-row { grid-template-columns: 1fr; }
+  nav { padding: 14px 21px; }
+  .hero h1 { font-size: 32px; }
+}
 </style>
 </head>
 <body>
-<div class="container">
-  <div class="header">
-    <div class="badge">AI Powered</div>
-    <h1>BRD Generator</h1>
-    <p>Upload communications to generate professional Business Requirement Documents</p>
+
+<nav>
+  <a href="index.jsp" class="nav-brand">
+    <div class="nav-logo">📄</div>
+    <span class="nav-title">BRD Generator</span>
+  </a>
+  <a href="generate-brd.jsp" class="nav-pill">Generate BRD →</a>
+</nav>
+
+<div class="page">
+
+  <!-- LEFT -->
+  <div class="hero">
+    <div class="hero-badge">AI Powered · Groq LLaMA</div>
+    <h1>Turn conversations into requirements</h1>
+    <p>Upload emails, meeting notes, and messages. Our AI transforms them into professional Business Requirement Documents.</p>
+
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-text">
+          <strong>Upload communications</strong>
+          <span>Paste emails, Slack messages, or meeting notes from any stakeholder</span>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-text">
+          <strong>Generate your BRD</strong>
+          <span>AI analyses all communications and produces a structured document</span>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-text">
+          <strong>Refine with natural language</strong>
+          <span>Edit the document by typing plain English instructions</span>
+        </div>
+      </div>
+    </div>
   </div>
 
-  <div class="card">
+  <!-- RIGHT FORM -->
+  <div class="form-card">
+    <h2>Upload communication</h2>
 
     <% if (successProject != null) { %>
     <div class="alert alert-success">
-      <span>✓</span>
-      <span>Communication uploaded for <strong><%= successProject %></strong>. Add more or generate the BRD.</span>
+      ✓ Communication saved for <strong><%= successProject %></strong>. Upload more or generate the BRD.
     </div>
     <% } %>
 
     <% if (errorMsg != null) { %>
-    <div class="alert alert-error">
-      <span>✕</span>
-      <span><%= errorMsg %></span>
-    </div>
+    <div class="alert alert-error">⚠ <%= errorMsg %></div>
     <% } %>
 
-    <form action="UploadServlet" method="post" onsubmit="return validateForm()">
+    <form action="UploadServlet" method="post" onsubmit="return validate()">
 
       <div class="form-row">
         <div class="form-group">
-          <label>Source Type</label>
+          <label>Source type</label>
           <select name="sourceType">
-            <option value="Email">📧 Email</option>
-            <option value="Slack">💬 Slack</option>
-            <option value="Meeting">🎙️ Meeting Notes</option>
-            <option value="Document">📄 Document</option>
-            <option value="Call">📞 Call Notes</option>
+            <option value="Email">Email</option>
+            <option value="Slack">Slack</option>
+            <option value="Meeting">Meeting notes</option>
+            <option value="Document">Document</option>
+            <option value="Call">Call notes</option>
           </select>
         </div>
-
         <div class="form-group">
-          <label>Sender Name</label>
+          <label>Sender name</label>
           <input type="text" name="senderName" placeholder="e.g. John Smith" maxlength="100">
         </div>
       </div>
 
       <div class="form-group">
-        <label>Project Name <span class="required">*</span></label>
+        <label>Project name <span class="req">*</span></label>
         <input type="text" name="projectName" id="projectName" placeholder="e.g. Customer Portal v2" maxlength="100" required>
       </div>
 
       <div class="form-group">
-        <label>Communication Content <span class="required">*</span></label>
-        <textarea name="content" id="content" placeholder="Paste the email, meeting notes, or message content here..." maxlength="10000" required oninput="updateCount()"></textarea>
-        <div class="char-count"><span id="charCount">0</span> / 10,000</div>
+        <label>Content <span class="req">*</span></label>
+        <textarea name="content" id="content" placeholder="Paste email, meeting notes, or message content here…" maxlength="10000" required oninput="updateCount()"></textarea>
+        <div class="char-hint"><span id="cc">0</span> / 10,000</div>
       </div>
 
-      <button type="submit" class="btn btn-primary">
-        Upload Communication
-      </button>
+      <button type="submit" class="btn-primary">Upload Communication</button>
     </form>
 
-    <hr class="divider">
-
-    <div class="secondary-action">
-      Ready to generate? &nbsp;
-      <a href="generate-brd.jsp">Generate BRD →</a>
+    <div class="form-footer">
+      Ready to build your document? <a href="generate-brd.jsp">Generate BRD →</a>
     </div>
-
   </div>
+
 </div>
 
 <script>
 function updateCount() {
-  const ta = document.getElementById('content');
-  document.getElementById('charCount').textContent = ta.value.length;
+  document.getElementById('cc').textContent = document.getElementById('content').value.length;
 }
-
-function validateForm() {
-  const project = document.getElementById('projectName').value.trim();
-  const content = document.getElementById('content').value.trim();
-  if (!project) { alert('Please enter a project name.'); return false; }
-  if (!content) { alert('Please enter some content.'); return false; }
+function validate() {
+  if (!document.getElementById('projectName').value.trim()) { alert('Please enter a project name.'); return false; }
+  if (!document.getElementById('content').value.trim()) { alert('Please enter content.'); return false; }
   return true;
 }
 </script>
